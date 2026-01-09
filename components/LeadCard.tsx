@@ -13,8 +13,26 @@ export default function LeadCard({ lead }: LeadCardProps) {
     });
   };
 
+  const getStatusColor = (status: string) => {
+    const statusLower = status.toLowerCase();
+    switch (statusLower) {
+      case "new":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "contacted":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      case "qualified":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+      case "converted":
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
+      case "rejected":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow p-6 border border-gray-100 dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all p-6 border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -34,7 +52,11 @@ export default function LeadCard({ lead }: LeadCardProps) {
             )}
           </div>
         </div>
-        <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-sm font-medium rounded-full">
+        <span
+          className={`px-3 py-1 text-sm font-medium rounded-full capitalize ${getStatusColor(
+            lead.status
+          )}`}
+        >
           {lead.status}
         </span>
       </div>

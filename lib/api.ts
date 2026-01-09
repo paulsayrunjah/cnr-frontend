@@ -1,4 +1,4 @@
-import { SearchResponse } from "@/types/lead";
+import { SearchResponse, PaginatedLeadsResponse } from "@/types/lead";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -36,6 +36,58 @@ export async function searchLeads(query: string): Promise<SearchResponse> {
     }
     throw new Error(
       error instanceof Error ? error.message : "Failed to search leads"
+    );
+  }
+}
+
+export interface FetchLeadsParams {
+  page?: number;
+  status?: string;
+  search?: string;
+  ordering?: string;
+}
+
+export async function fetchLeads(params: FetchLeadsParams = {}): Promise<PaginatedLeadsResponse> {
+  try {
+    const queryParams = new URLSearchParams();
+
+    if (params.page) {
+      queryParams.append("page", params.page.toString());
+    }
+    if (params.status && params.status !== "all") {
+      queryParams.append("status", params.status);
+    }
+    if (params.search) {
+      queryParams.append("search", params.search);
+    }
+    if (params.ordering) {
+      queryParams.append("ordering", params.ordering);
+    }
+
+    const url = `${API_BASE_URL}/api/v1/leads/${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new ApiError(
+        response.status,
+        `API request failed: ${response.statusText}`
+      );
+    }
+
+    const data: PaginatedLeadsResponse = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch leads"
     );
   }
 }

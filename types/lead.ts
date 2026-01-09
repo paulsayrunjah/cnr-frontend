@@ -33,3 +33,10 @@ export interface SearchResponse {
   duplicate_leads_count: number;
   new_leads: Lead[];
 }
+
+export interface PaginatedLeadsResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Lead[];
+}
