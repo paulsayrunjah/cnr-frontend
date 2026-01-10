@@ -7,12 +7,15 @@ import LeadsBrowser from "@/components/LeadsBrowser";
 import ProcessedLeadsList from "@/components/ProcessedLeadsList";
 import EmailsList from "@/components/EmailsList";
 import SendEmailModal from "@/components/SendEmailModal";
+import LoginForm from "@/components/LoginForm";
 import { searchLeads } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { Lead } from "@/types/lead";
 
 type TabType = "search" | "browse" | "processed" | "emails";
 
 export default function Home() {
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("browse");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,10 +64,47 @@ export default function Home() {
     setEmailsKey((prev) => prev + 1);
   };
 
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-lg text-gray-600 dark:text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
-        <header className="text-center mb-8">
+        <header className="text-center mb-8 relative">
+          {/* Logout Button */}
+          <button
+            onClick={logout}
+            className="absolute right-0 top-0 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all flex items-center gap-2"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+            Logout
+          </button>
           <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-3">
             Leads Tracker
           </h1>

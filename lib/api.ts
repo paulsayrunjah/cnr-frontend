@@ -1,6 +1,7 @@
 import { SearchResponse, PaginatedLeadsResponse } from "@/types/lead";
 import { ProcessedLeadInput, ProcessedLead, PaginatedProcessedLeadsResponse } from "@/types/processedLead";
 import { EmailsResponse, SendEmailRequest } from "@/types/email";
+import { getAccessToken } from "@/lib/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -11,13 +12,22 @@ export class ApiError extends Error {
   }
 }
 
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  const token = getAccessToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export async function searchLeads(query: string): Promise<SearchResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1/searches/simple_search/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         textSearch: query,
       }),
@@ -70,9 +80,7 @@ export async function fetchLeads(params: FetchLeadsParams = {}): Promise<Paginat
 
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -100,9 +108,7 @@ export async function fetchProcessedLeads(): Promise<PaginatedProcessedLeadsResp
 
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -128,9 +134,7 @@ export async function createProcessedLead(leadData: ProcessedLeadInput): Promise
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1/processed-leads/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(leadData),
     });
 
@@ -169,9 +173,7 @@ export async function fetchEmails(params: FetchEmailsParams = {}): Promise<Email
 
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -197,9 +199,7 @@ export async function sendEmail(emailData: SendEmailRequest): Promise<any> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1/emails/send-html-template/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(emailData),
     });
 
