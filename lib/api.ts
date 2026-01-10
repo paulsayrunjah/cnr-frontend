@@ -3,7 +3,7 @@ import { ProcessedLeadInput, ProcessedLead, PaginatedProcessedLeadsResponse } fr
 import { EmailsResponse, SendEmailRequest } from "@/types/email";
 import { getAccessToken } from "@/lib/auth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http:///91.99.220.6:8000";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
