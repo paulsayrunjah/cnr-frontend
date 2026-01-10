@@ -5,16 +5,20 @@ import SearchBar from "@/components/SearchBar";
 import LeadsList from "@/components/LeadsList";
 import LeadsBrowser from "@/components/LeadsBrowser";
 import ProcessedLeadsList from "@/components/ProcessedLeadsList";
+import EmailsList from "@/components/EmailsList";
+import SendEmailModal from "@/components/SendEmailModal";
 import { searchLeads } from "@/lib/api";
 import { Lead } from "@/types/lead";
 
-type TabType = "search" | "browse" | "processed";
+type TabType = "search" | "browse" | "processed" | "emails";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("browse");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState(false);
+  const [emailsKey, setEmailsKey] = useState(0);
   const [resultsInfo, setResultsInfo] = useState<{
     query: string;
     total: number;
@@ -51,6 +55,10 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEmailSent = () => {
+    setEmailsKey((prev) => prev + 1);
   };
 
   return (
@@ -143,6 +151,31 @@ export default function Home() {
                 Processed Leads
               </div>
             </button>
+            <button
+              onClick={() => setActiveTab("emails")}
+              className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                activeTab === "emails"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                Emails
+              </div>
+            </button>
           </div>
         </div>
 
@@ -225,6 +258,40 @@ export default function Home() {
 
         {/* Processed Leads Tab Content */}
         {activeTab === "processed" && <ProcessedLeadsList />}
+
+        {/* Emails Tab Content */}
+        {activeTab === "emails" && (
+          <div>
+            <div className="flex justify-end mb-6">
+              <button
+                onClick={() => setIsSendEmailModalOpen(true)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 shadow-md"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Send New Email
+              </button>
+            </div>
+            <EmailsList key={emailsKey} />
+          </div>
+        )}
+
+        <SendEmailModal
+          isOpen={isSendEmailModalOpen}
+          onClose={() => setIsSendEmailModalOpen(false)}
+          onSuccess={handleEmailSent}
+        />
       </div>
     </div>
   );

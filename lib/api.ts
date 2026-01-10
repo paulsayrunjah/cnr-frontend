@@ -1,5 +1,6 @@
 import { SearchResponse, PaginatedLeadsResponse } from "@/types/lead";
 import { ProcessedLeadInput, ProcessedLead, PaginatedProcessedLeadsResponse } from "@/types/processedLead";
+import { EmailsResponse, SendEmailRequest } from "@/types/email";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
@@ -151,3 +152,73 @@ export async function createProcessedLead(leadData: ProcessedLeadInput): Promise
     );
   }
 }
+
+export interface FetchEmailsParams {
+  page?: number;
+}
+
+export async function fetchEmails(params: FetchEmailsParams = {}): Promise<EmailsResponse> {
+  try {
+    const queryParams = new URLSearchParams();
+
+    if (params.page) {
+      queryParams.append("page", params.page.toString());
+    }
+
+    const url = `${API_BASE_URL}/api/v1/emails/${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new ApiError(
+        response.status,
+        `API request failed: ${response.statusText}`
+      );
+    }
+
+    const data: EmailsResponse = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to fetch emails"
+    );
+  }
+}
+
+export async function sendEmail(emailData: SendEmailRequest): Promise<any> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/emails/send-html-template/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(emailData),
+    });
+
+    if (!response.ok) {
+      throw new ApiError(
+        response.status,
+        `API request failed: ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to send email"
+    );
+  }
+}
+
